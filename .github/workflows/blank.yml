@@ -1,0 +1,21 @@
+name: Growtopia Live Player Count
+
+on:
+  workflow_dispatch:  # Memungkinkan eksekusi manual
+  schedule:
+    - cron: '*/5 * * * *'  # Cek setiap 5 menit
+
+jobs:
+  run_script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Lua
+        run: |
+          sudo apt update
+          sudo apt install lua5.3 -y  # Install Lua 5.3
+
+      - name: Run Growtopia Live Count Script
+        run: lua count.lua
