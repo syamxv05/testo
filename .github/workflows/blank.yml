@@ -16,4 +16,4 @@ jobs:
           sudo apt install lua5.3 -y  # Install Lua 5.3
 
       - name: Run Growtopia Live Count Script (6 Jam)
-        run: timeout 6h lua live_count.lua  # Menjalankan script selama 6 jam
+        run: timeout 6h lua count.lua  # Menjalankan script selama 6 jam
