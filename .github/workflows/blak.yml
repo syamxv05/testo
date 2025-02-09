@@ -22,4 +22,4 @@ jobs:
 
       - name: Run live_count.lua
         run: |
-          nohup lua live_count.lua &
+          nohup lua count.lua &
