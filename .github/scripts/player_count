@@ -1,0 +1,47 @@
+local http = require("socket.http")
+local ltn12 = require("ltn12")
+local json = require("cjson")
+
+local oldCounter = 0
+local bwlimit = 2000
+local checkInterval = 5 * 60 -- in seconds
+local server_url = "https://growtopiagame.com/detail"
+local webhook_link = os.getenv("https://discord.com/api/webhooks/1342666656803065878/6QRVHXInrjGqeowdGgR_oYTiadMfKqurcjoB5xJzObHhWDEUaDp70deGEGGI6FyOVuOO")
+local discordUserId = os.getenv("DISCORD_USER_ID")
+
+local function wh(msg)
+  local payload = json.encode({ content = "[BW Counter] " .. msg })
+  http.request{
+    url = webhook_link,
+    method = "POST",
+    headers = {
+      ["Content-Type"] = "application/json",
+      ["Content-Length"] = #payload
+    },
+    source = ltn12.source.string(payload)
+  }
+end
+
+wh("BW Counter started!\nBw notifier : "..bwlimit.."\nCheck Interval : "..checkInterval / 60 .." minute(s)")
+
+while true do
+  local response_body = {}
+  http.request{
+    url = server_url,
+    sink = ltn12.sink.table(response_body)
+  }
+
+  local response = table.concat(response_body)
+  local player_count = tonumber(response:match('"online_user":"(%d+)"'))
+  local player_difference_raw = oldCounter - player_count
+  oldCounter = player_count
+  local player_difference_sym = player_difference_raw > 0 and "-" or "+"
+
+  if player_difference_raw > bwlimit and player_difference_sym == "-" then
+    wh("<t:"..os.time()..":T> "..player_count.." | (**"..player_difference_sym..math.abs(player_difference_raw).."**) | <@"..discordUserId..">")
+  else
+    wh("<t:"..os.time()..":T> "..player_count.." | (**"..player_difference_sym..math.abs(player_difference_raw).."**)")
+  end
+
+  os.execute("sleep " .. checkInterval)
+end
